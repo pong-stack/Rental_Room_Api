@@ -16,23 +16,7 @@ A NestJS application with TypeORM integration, PostgreSQL database, and Docker s
 npm install
 ```
 
-### 2. Environment Configuration
 
-Create a `.env` file in the root directory with the following variables:
-
-```env
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=15432
-DB_USERNAME=myuser
-DB_PASSWORD=mypassword
-DB_NAME=mydatabase
-DB_SYNCHRONIZE=true
-DB_LOGGING=true
-
-# Application Configuration
-PORT=6000
-```
 
 ### 3. Start Database
 
