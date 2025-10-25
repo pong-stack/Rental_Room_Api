@@ -1,12 +1,12 @@
 services:
-  # NestJS API Service
+  # NestJS API Service (Development)
   api:
     build: .
     restart: always
     ports:
       - '6000:3000'
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - DB_HOST=db
       - DB_PORT=5432
       - DB_USERNAME=myuser
@@ -16,8 +16,9 @@ services:
     depends_on:
       - db
     volumes:
-      - ./src:/app/src
-      - ./dist:/app/dist
+      - .:/app
+      - /app/node_modules
+    command: npm run start:dev
 
   # PostgreSQL Database
   db:
@@ -30,14 +31,14 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - '15432:5432' # change PostgreSQL to port 15432
+      - '15432:5432'
 
   # Database Admin Interface
   adminer:
     image: adminer
     restart: always
     ports:
-      - '18000:8080' # change Adminer to port 18000
+      - '18000:8080'
     depends_on:
       - db
 
