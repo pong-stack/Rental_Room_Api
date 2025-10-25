@@ -11,6 +11,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
 import { VerificationModule } from './modules/verification/verification.module';
 import { UserModule } from './modules/user/user.module';
+import { BackupModule } from './backup/backup.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { UserModule } from './modules/user/user.module';
     AdminModule,
     InvoiceModule,
     VerificationModule,
+    BackupModule,
     // Legacy module
   ],
   controllers: [AppController],

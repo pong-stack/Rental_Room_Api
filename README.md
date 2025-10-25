@@ -6,42 +6,60 @@ A NestJS application with TypeORM integration, PostgreSQL database, and Docker s
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
 - Docker and Docker Compose
-- npm or yarn
 
-### 1. Install Dependencies
+### 1. Create Environment File
 
-```bash
-npm install
-```
-
-
-
-### 3. Start Database
+Create a `.env` file in the root directory with this content:
 
 ```bash
-# Start PostgreSQL and Adminer using Docker Compose
-docker-compose up -d
+# Application Configuration
+PORT=6000
+NODE_ENV=production
+
+# Database Configuration
+DB_HOST=db
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_NAME=postgres
+DB_SYNCHRONIZE=true
+DB_LOGGING=false
 ```
 
-This will start:
-
-- PostgreSQL database on port `15432`
-- Adminer (database admin interface) on port `18000`
-
-### 4. Run the Application
+### 2. Start Everything with Docker
 
 ```bash
-# Development mode with hot reload
-npm run start:dev
-
-# Production mode
-npm run build
-npm run start:prod
+# Build and start all services
+docker-compose up --build -d
 ```
 
-The application will be available at `http://localhost:6000`
+This single command will:
+
+- ✅ Install all dependencies inside Docker
+- ✅ Build the NestJS application
+- ✅ Start PostgreSQL database
+- ✅ Start Adminer (database admin interface)
+- ✅ Start your API server
+- ✅ Run everything in detached mode
+
+## Services Available
+
+After running the command, you'll have:
+
+- **API Server**: `http://localhost:6000`
+- **Database**: `localhost:15432` (PostgreSQL)
+- **Adminer**: `http://localhost:18000` (Database admin interface)
+
+## 🛑 Stopping Services
+
+```bash
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (clean reset)
+docker-compose down -v
+```
 
 ## 🗄️ Database Migration
 
@@ -95,17 +113,17 @@ npm run format        # Format code with Prettier
 ### PostgreSQL Database
 
 - **Port**: 15432
-- **Username**: myuser
-- **Password**: mypassword
-- **Database**: mydatabase
+- **Username**: postgres
+- **Password**: postgres
+- **Database**: postgres
 
 ### Adminer (Database Admin)
 
 - **URL**: http://localhost:18000
 - **Server**: db
-- **Username**: myuser
-- **Password**: mypassword
-- **Database**: mydatabase
+- **Username**: postgres
+- **Password**: postgres
+- **Database**: postgres
 
 ## 🔧 Configuration
 
@@ -142,34 +160,37 @@ curl http://localhost:6000
 # Expected: "Hello World!"
 ```
 
-
-
 ## 🚨 Troubleshooting
 
 ### Common Issues
 
 1. **Database Connection Failed**
    - Ensure Docker is running
-   - Check if PostgreSQL container is up: `docker-compose ps`
-   - Verify environment variables in `.env`
+   - Check if all containers are up: `docker-compose ps`
+   - Verify `.env` file exists and has correct values
+   - Check container logs: `docker-compose logs api` or `docker-compose logs db`
 
 2. **Port Already in Use**
    - Change the `PORT` in `.env` file
    - Kill the process using the port: `lsof -ti:6000 | xargs kill -9`
 
-3. **TypeORM Synchronization Issues**
-   - Check `DB_SYNCHRONIZE` setting
-   - Ensure database exists and is accessible
+3. **Build Issues**
+   - Clean Docker cache: `docker-compose down && docker system prune -f`
+   - Rebuild: `docker-compose up --build -d`
+
+4. **TypeORM Synchronization Issues**
+   - Check `DB_SYNCHRONIZE` setting in `.env`
+   - Ensure database container is running
    - Check entity imports in `ormconfig.ts`
 
-### Reset Database
+### Reset Everything
 
 ```bash
-# Stop and remove containers
+# Stop and remove everything (clean reset)
 docker-compose down -v
 
 # Start fresh
-docker-compose up -d
+docker-compose up --build -d
 ```
 
 ## 📝 Development Notes

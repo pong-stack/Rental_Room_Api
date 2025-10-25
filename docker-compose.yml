@@ -6,16 +6,15 @@ services:
     depends_on:
       - db
     env_file:
-      - .env                 
+      - .env
     ports:
-      - "${PORT}:6000"       
-    command: npm run start:prod
+      - '6000:6000'
 
   db:
     image: postgres:15-alpine
     restart: always
     env_file:
-      - .env                 
+      - .env
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -23,13 +22,13 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "15432:5432"
+      - '15432:5432'
 
   adminer:
     image: adminer
     restart: always
     ports:
-      - "18000:8080"
+      - '18000:8080'
     depends_on:
       - db
 
