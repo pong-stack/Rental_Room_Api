@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "15432:5432"   # change PostgreSQL to port 15432
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "18000:8080"   # change Adminer to port 18000
+
+volumes:
+  postgres_data:

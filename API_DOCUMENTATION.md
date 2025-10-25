@@ -119,6 +119,8 @@ Authorization: Bearer <access_token>
 Authorization: Bearer <access_token>
 ```
 
+**Note:** Users can only access their own profile. Admins can access any user profile.
+
 ### 6. Update User
 
 **PATCH** `/users/:id`
@@ -128,6 +130,8 @@ Authorization: Bearer <access_token>
 ```
 Authorization: Bearer <access_token>
 ```
+
+**Note:** Users can only update their own profile. Admins can update any user profile.
 
 **Request Body:**
 
