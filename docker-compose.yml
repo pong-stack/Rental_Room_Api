@@ -1,43 +1,35 @@
 services:
-  # NestJS API Service
   api:
     build: .
+    container_name: nest-js-api
     restart: always
-    ports:
-      - '6000:3000'
-    environment:
-      - NODE_ENV=production
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_USERNAME=myuser
-      - DB_PASSWORD=mypassword
-      - DB_DATABASE=mydatabase
-      - JWT_SECRET=your-jwt-secret-key
     depends_on:
       - db
-    volumes:
-      - ./src:/app/src
-      - ./dist:/app/dist
+    env_file:
+      - .env                 
+    ports:
+      - "${PORT}:6000"       
+    command: npm run start:prod
 
-  # PostgreSQL Database
   db:
     image: postgres:15-alpine
     restart: always
+    env_file:
+      - .env                 
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydatabase
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - '15432:5432' # change PostgreSQL to port 15432
+      - "15432:5432"
 
-  # Database Admin Interface
   adminer:
     image: adminer
     restart: always
     ports:
-      - '18000:8080' # change Adminer to port 18000
+      - "18000:8080"
     depends_on:
       - db
 
