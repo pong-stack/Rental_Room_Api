@@ -17,17 +17,9 @@ Create a `.env` file in the root directory with this content:
 PORT=6000
 NODE_ENV=production
 
-# Database Configuration
-DB_HOST=db
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_NAME=postgres
-DB_SYNCHRONIZE=true
-DB_LOGGING=false
-```
 
-### 2. Start Everything with Docker
+
+### 1. Start Everything with Docker
 
 ```bash
 # Build and start all services
