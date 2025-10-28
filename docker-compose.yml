@@ -4,13 +4,16 @@ services:
     container_name: nest-js-api
     restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - .env
     ports:
       - '6001:6001'
     volumes:
       - ./uploads:/app/uploads
+    environment:
+      - NODE_ENV=production
 
   db:
     image: postgres:15-alpine
@@ -25,6 +28,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - '15432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME} -d ${DB_NAME}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   adminer:
     image: adminer

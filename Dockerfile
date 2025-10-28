@@ -31,5 +31,5 @@ ENV PORT=6001
 # Expose port
 EXPOSE 6001
 
-# Start the application
-CMD ["npm", "run", "start:prod"]
+# Start the application with host binding for Docker
+CMD ["node", "dist/src/main.js"]
