@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { BackupService } from './backup.service';
 import { BackupConfigService } from './backup-config.service';
+import { ApiResponseDto } from '../common/dto/api-response.dto';
 
 @Controller('backup')
 export class BackupController {
@@ -20,21 +21,20 @@ export class BackupController {
   ) {}
 
   @Post('create')
-  async createBackup() {
+  async createBackup(): Promise<ApiResponseDto> {
     const result = await this.backupService.createBackup();
 
     if (!result.success) {
       throw new HttpException(result.error || 'Backup failed', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    return {
-      message: 'Backup created successfully',
+    return ApiResponseDto.success('Backup created successfully', {
       filename: result.filename,
-    };
+    });
   }
 
   @Post('restore')
-  async restoreBackup(@Body() body: { filename: string }) {
+  async restoreBackup(@Body() body: { filename: string }): Promise<ApiResponseDto> {
     if (!body.filename) {
       throw new HttpException('Filename is required', HttpStatus.BAD_REQUEST);
     }
@@ -45,14 +45,13 @@ export class BackupController {
       throw new HttpException(result.error || 'Restore failed', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    return {
-      message: 'Database restored successfully',
+    return ApiResponseDto.success('Database restored successfully', {
       filename: body.filename,
-    };
+    });
   }
 
   @Get('list')
-  listBackups() {
+  listBackups(): ApiResponseDto {
     const backups = this.backupService.listBackups();
     const backupDetails = backups.map(filename => {
       const info = this.backupService.getBackupInfo(filename);
@@ -64,81 +63,78 @@ export class BackupController {
       };
     });
 
-    return {
+    return ApiResponseDto.success('Backups retrieved successfully', {
       backups: backupDetails,
-    };
+    });
   }
 
   @Get('info/:filename')
-  getBackupInfo(@Param('filename') filename: string) {
+  getBackupInfo(@Param('filename') filename: string): ApiResponseDto {
     const info = this.backupService.getBackupInfo(filename);
 
     if (!info.exists) {
       throw new HttpException('Backup file not found', HttpStatus.NOT_FOUND);
     }
 
-    return {
+    return ApiResponseDto.success('Backup info retrieved successfully', {
       filename,
       size: info.size,
       created: info.created,
       sizeFormatted: this.formatBytes(info.size),
-    };
+    });
   }
 
   @Delete(':filename')
-  deleteBackup(@Param('filename') filename: string) {
+  deleteBackup(@Param('filename') filename: string): ApiResponseDto {
     const result = this.backupService.deleteBackup(filename);
 
     if (!result.success) {
       throw new HttpException(result.error || 'Delete failed', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    return {
-      message: 'Backup deleted successfully',
+    return ApiResponseDto.success('Backup deleted successfully', {
       filename,
-    };
+    });
   }
 
   @Get('stats')
-  getBackupStats() {
+  getBackupStats(): ApiResponseDto {
     const stats = this.backupService.getBackupStats();
-    return {
+    return ApiResponseDto.success('Backup statistics retrieved successfully', {
       ...stats,
       totalSizeFormatted: this.formatBytes(stats.totalSize),
-    };
+    });
   }
 
   @Get('config')
-  getBackupConfig() {
-    return this.backupConfigService.getConfig();
+  getBackupConfig(): ApiResponseDto {
+    const config = this.backupConfigService.getConfig();
+    return ApiResponseDto.success('Backup configuration retrieved successfully', config);
   }
 
   @Put('config')
-  updateBackupConfig(@Body() config: Partial<any>) {
+  updateBackupConfig(@Body() config: Partial<any>): ApiResponseDto {
     try {
       this.backupConfigService.updateConfig(config);
-      return {
-        message: 'Backup configuration updated successfully',
+      return ApiResponseDto.success('Backup configuration updated successfully', {
         config: this.backupConfigService.getConfig(),
-      };
+      });
     } catch (error: any) {
       throw new HttpException(
-        `Failed to update configuration: ${error?.message || 'Unknown error'}`,
+        `Failed to update configuration: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
 
   @Post('cleanup')
-  async cleanupOldBackups() {
+  async cleanupOldBackups(): Promise<ApiResponseDto> {
     try {
       await this.backupService.cleanupOldBackups();
-      return {
-        message: 'Backup cleanup completed successfully',
-      };
+      return ApiResponseDto.success('Backup cleanup completed successfully');
     } catch (error: any) {
       throw new HttpException(
-        `Cleanup failed: ${error?.message || 'Unknown error'}`,
+        `Cleanup failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }

@@ -20,15 +20,85 @@ export class HomeService {
     private roomRuleRepository: Repository<RoomRule>
   ) {}
 
+  async testDatabaseConnection(): Promise<boolean> {
+    try {
+      console.log('=== Testing Database Connection ===');
+      const result = await this.homeRepository.query('SELECT 1 as test');
+      console.log('Database connection test result:', result);
+      console.log('=== Database Connection OK ===');
+      return true;
+    } catch (error) {
+      console.error('Database connection test failed:', error);
+      return false;
+    }
+  }
+
   async createHome(createHomeDto: CreateHomeDto, ownerId: number): Promise<Home> {
-    const home = this.homeRepository.create({
-      ...createHomeDto,
-      ownerId,
-    });
-    return this.homeRepository.save(home);
+    try {
+      console.log('=== HomeService.createHome Debug ===');
+      console.log('Input DTO:', createHomeDto);
+      console.log('Owner ID:', ownerId);
+
+      // Extract image_urls and map to individual image columns
+      const { image_urls, ...homeData } = createHomeDto;
+
+      // Map image_urls array to individual image columns
+      const imageMapping = {
+        image1: image_urls?.[0] || homeData.image1,
+        image2: image_urls?.[1] || homeData.image2,
+        image3: image_urls?.[2] || homeData.image3,
+        image4: image_urls?.[3] || homeData.image4,
+      };
+
+      console.log('Image mapping:', imageMapping);
+
+      const homeDataToSave = {
+        ...homeData,
+        ...imageMapping,
+        ownerId,
+      };
+
+      console.log('Final data to save:', homeDataToSave);
+
+      const home = this.homeRepository.create(homeDataToSave);
+      console.log('Created home entity:', home);
+
+      // Use a transaction to ensure data is committed
+      const savedHome = await this.homeRepository.manager.transaction(
+        async transactionalEntityManager => {
+          const result = await transactionalEntityManager.save(Home, home);
+          console.log('Transaction saved home:', result);
+          return result;
+        }
+      );
+
+      console.log('Saved home:', savedHome);
+      console.log('=== End Debug ===');
+
+      return savedHome;
+    } catch (error) {
+      console.error('Error in HomeService.createHome:', error);
+      throw error;
+    }
   }
 
   async findAllHomes(): Promise<Home[]> {
+    try {
+      console.log('=== HomeService.findAllHomes Debug ===');
+      const homes = await this.homeRepository.find({
+        relations: ['owner', 'rooms', 'rooms.rules'],
+      });
+      console.log('Found homes:', homes);
+      console.log('Number of homes:', homes.length);
+      console.log('=== End Debug ===');
+      return homes;
+    } catch (error) {
+      console.error('Error in HomeService.findAllHomes:', error);
+      throw error;
+    }
+  }
+
+  async findApprovedHomes(): Promise<Home[]> {
     return this.homeRepository.find({
       relations: ['owner', 'rooms', 'rooms.rules'],
       where: { verificationStatus: VerificationStatus.APPROVED },
@@ -62,7 +132,18 @@ export class HomeService {
       throw new ForbiddenException('You can only update your own homes');
     }
 
-    Object.assign(home, updateHomeDto);
+    // Extract image_urls and map to individual image columns
+    const { image_urls, ...homeData } = updateHomeDto;
+
+    // Map image_urls array to individual image columns if provided
+    if (image_urls) {
+      home.image1 = image_urls[0] ?? home.image1;
+      home.image2 = image_urls[1] ?? home.image2;
+      home.image3 = image_urls[2] ?? home.image3;
+      home.image4 = image_urls[3] ?? home.image4;
+    }
+
+    Object.assign(home, homeData);
     return this.homeRepository.save(home);
   }
 
@@ -199,5 +280,58 @@ export class HomeService {
     }
 
     await this.roomRuleRepository.remove(rule);
+  }
+
+  async updateHomeImages(
+    homeId: number,
+    imageData: { image1?: string; image2?: string; image3?: string; image4?: string },
+    ownerId: number
+  ): Promise<Home> {
+    const home = await this.homeRepository.findOne({
+      where: { id: homeId },
+    });
+
+    if (!home) {
+      throw new NotFoundException('Home not found');
+    }
+
+    if (home.ownerId !== ownerId) {
+      throw new ForbiddenException('You can only update images for your own homes');
+    }
+
+    // Update only the provided image fields
+    if (imageData.image1 !== undefined) home.image1 = imageData.image1;
+    if (imageData.image2 !== undefined) home.image2 = imageData.image2;
+    if (imageData.image3 !== undefined) home.image3 = imageData.image3;
+    if (imageData.image4 !== undefined) home.image4 = imageData.image4;
+
+    return this.homeRepository.save(home);
+  }
+
+  async updateRoomImages(
+    roomId: number,
+    imageData: { image1?: string; image2?: string; image3?: string; image4?: string },
+    ownerId: number
+  ): Promise<Room> {
+    const room = await this.roomRepository.findOne({
+      where: { id: roomId },
+      relations: ['home'],
+    });
+
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    if (room.home.ownerId !== ownerId) {
+      throw new ForbiddenException('You can only update images for rooms in your own homes');
+    }
+
+    // Update only the provided image fields
+    if (imageData.image1 !== undefined) room.image1 = imageData.image1;
+    if (imageData.image2 !== undefined) room.image2 = imageData.image2;
+    if (imageData.image3 !== undefined) room.image3 = imageData.image3;
+    if (imageData.image4 !== undefined) room.image4 = imageData.image4;
+
+    return this.roomRepository.save(room);
   }
 }

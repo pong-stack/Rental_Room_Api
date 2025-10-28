@@ -31,6 +31,18 @@ export class Room {
   @Column({ name: 'is_available', type: 'boolean', default: true })
   isAvailable: boolean;
 
+  @Column({ name: 'image_1', type: 'varchar', length: 500, nullable: true })
+  image1: string;
+
+  @Column({ name: 'image_2', type: 'varchar', length: 500, nullable: true })
+  image2: string;
+
+  @Column({ name: 'image_3', type: 'varchar', length: 500, nullable: true })
+  image3: string;
+
+  @Column({ name: 'image_4', type: 'varchar', length: 500, nullable: true })
+  image4: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

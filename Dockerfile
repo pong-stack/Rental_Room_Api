@@ -1,5 +1,5 @@
-# Use Node.js 18 Alpine as base image
-FROM node:18-alpine
+# Use Node.js 20 Alpine as base image (has better crypto support)
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
@@ -22,11 +22,14 @@ RUN npm run build
 # Remove dev dependencies to reduce image size
 RUN npm prune --production
 
+# Create uploads directory with proper permissions
+RUN mkdir -p /app/uploads/images && chmod -R 755 /app/uploads
+
 # Set environment variable for port
-ENV PORT=6000
+ENV PORT=6001
 
 # Expose port
-EXPOSE 6000
+EXPOSE 6001
 
 # Start the application
 CMD ["npm", "run", "start:prod"]

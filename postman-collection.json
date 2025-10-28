@@ -1,0 +1,1065 @@
+{
+  "info": {
+    "name": "NestJS Home Rental API",
+    "description": "Complete API collection for the NestJS Home Rental application",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:6001/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "App",
+      "item": [
+        {
+          "name": "Get API Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"phoneNumber\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated Name\",\n  \"phoneNumber\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete User (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Homes",
+      "item": [
+        {
+          "name": "Get All Homes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/homes",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes"]
+            }
+          }
+        },
+        {
+          "name": "Get Approved Homes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/homes/approved",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "approved"]
+            }
+          }
+        },
+        {
+          "name": "Get My Homes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/homes/my-homes",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "my-homes"]
+            }
+          }
+        },
+        {
+          "name": "Get Home by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/homes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Home",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Beautiful Home",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "123 Main Street, City, State",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "A lovely home with great amenities",
+                  "type": "text"
+                },
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/homes",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes"]
+            }
+          }
+        },
+        {
+          "name": "Update Home",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Home Name\",\n  \"address\": \"456 New Street\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/homes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Home",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/homes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Add Room to Home",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Master Bedroom\",\n  \"price\": 150.00,\n  \"capacity\": 2,\n  \"isAvailable\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/homes/1/rooms",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "1", "rooms"]
+            }
+          }
+        },
+        {
+          "name": "Update Room",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Room Name\",\n  \"price\": 200.00,\n  \"capacity\": 3,\n  \"isAvailable\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/homes/rooms/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "rooms", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Room",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/homes/rooms/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "rooms", "1"]
+            }
+          }
+        },
+        {
+          "name": "Add Room Rule",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruleTitle\": \"No Smoking\",\n  \"ruleDescription\": \"Smoking is not allowed in this room\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/homes/rooms/1/rules",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "rooms", "1", "rules"]
+            }
+          }
+        },
+        {
+          "name": "Update Room Rule",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruleTitle\": \"Updated Rule\",\n  \"ruleDescription\": \"Updated rule description\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/homes/rules/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "rules", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Room Rule",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/homes/rules/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "rules", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Home Images",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/homes/1/images",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "1", "images"]
+            }
+          }
+        },
+        {
+          "name": "Update Room Images",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/homes/rooms/1/images",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "rooms", "1", "images"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "item": [
+        {
+          "name": "Get My Invoices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices"]
+            }
+          }
+        },
+        {
+          "name": "Get Invoice by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"homeId\": 1,\n  \"dueDate\": \"2024-12-31\",\n  \"notes\": \"Monthly rent payment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices"]
+            }
+          }
+        },
+        {
+          "name": "Update Invoice Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"paid\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invoices/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "1", "status"]
+            }
+          }
+        },
+        {
+          "name": "Add Invoice Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Monthly Rent\",\n  \"quantity\": 1,\n  \"unitPrice\": 1000.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invoices/1/items",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "1", "items"]
+            }
+          }
+        },
+        {
+          "name": "Delete Invoice Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/items/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "items", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Invoices by Home",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/home/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "home", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verification",
+      "item": [
+        {
+          "name": "Create Verification Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"homeId\": 1,\n  \"message\": \"Please verify my home listing\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/verification/request",
+              "host": ["{{baseUrl}}"],
+              "path": ["verification", "request"]
+            }
+          }
+        },
+        {
+          "name": "Get My Verification Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/verification/my-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["verification", "my-requests"]
+            }
+          }
+        },
+        {
+          "name": "Get Verification Request by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/verification/requests/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["verification", "requests", "1"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Verification Request",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/verification/requests/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["verification", "requests", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/statistics",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "statistics"]
+            }
+          }
+        },
+        {
+          "name": "Get Verification Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/verification-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "verification-requests"]
+            }
+          }
+        },
+        {
+          "name": "Get Verification Request by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/verification-requests/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "verification-requests", "1"]
+            }
+          }
+        },
+        {
+          "name": "Review Verification Request",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\",\n  \"adminNotes\": \"Home looks good, approved for listing\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/verification-requests/1/review",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "verification-requests", "1", "review"]
+            }
+          }
+        },
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update User Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/1/role",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", "1", "role"]
+            }
+          }
+        },
+        {
+          "name": "Get All Homes (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/homes",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "homes"]
+            }
+          }
+        },
+        {
+          "name": "Get Home by ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/homes/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "homes", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Backup",
+      "item": [
+        {
+          "name": "Create Backup",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/backup/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["backup", "create"]
+            }
+          }
+        },
+        {
+          "name": "Restore Backup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"filename\": \"backup_2024-01-01_12-00-00.sql\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/backup/restore",
+              "host": ["{{baseUrl}}"],
+              "path": ["backup", "restore"]
+            }
+          }
+        },
+        {
+          "name": "List Backups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/backup/list",
+              "host": ["{{baseUrl}}"],
+              "path": ["backup", "list"]
+            }
+          }
+        },
+        {
+          "name": "Get Backup Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/backup/info/backup_2024-01-01_12-00-00.sql",
+              "host": ["{{baseUrl}}"],
+              "path": ["backup", "info", "backup_2024-01-01_12-00-00.sql"]
+            }
+          }
+        },
+        {
+          "name": "Delete Backup",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/backup/backup_2024-01-01_12-00-00.sql",
+              "host": ["{{baseUrl}}"],
+              "path": ["backup", "backup_2024-01-01_12-00-00.sql"]
+            }
+          }
+        },
+        {
+          "name": "Get Backup Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/backup/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["backup", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Backup Config",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/backup/config",
+              "host": ["{{baseUrl}}"],
+              "path": ["backup", "config"]
+            }
+          }
+        },
+        {
+          "name": "Update Backup Config",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maxBackups\": 10,\n  \"retentionDays\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/backup/config",
+              "host": ["{{baseUrl}}"],
+              "path": ["backup", "config"]
+            }
+          }
+        },
+        {
+          "name": "Cleanup Old Backups",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/backup/cleanup",
+              "host": ["{{baseUrl}}"],
+              "path": ["backup", "cleanup"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

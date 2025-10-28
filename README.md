@@ -12,7 +12,7 @@ A NestJS application with TypeORM integration, PostgreSQL database, and Docker s
 
 Create a `.env` file in the root directory with this content:
 
-```bash
+````bash
 # Application Configuration
 PORT=6000
 NODE_ENV=production
@@ -24,7 +24,7 @@ NODE_ENV=production
 ```bash
 # Build and start all services
 docker-compose up --build -d
-```
+````
 
 This single command will:
 

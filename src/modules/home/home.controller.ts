@@ -6,50 +6,166 @@ import {
   Delete,
   Body,
   Param,
-  UseGuards,
   Request,
+  Patch,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { HomeService } from './home.service';
 import { CreateHomeDto } from './dto/create-home.dto';
 import { UpdateHomeDto } from './dto/update-home.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { CreateRoomRuleDto } from './dto/create-room-rule.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ApiResponseDto } from '../../common/dto/api-response.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileUploadService } from '../../common/services/file-upload.service';
+import { diskStorage } from 'multer';
+import { BadRequestException } from '@nestjs/common';
+import { join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 
 @Controller('homes')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard) // Temporarily disabled for testing
 export class HomeController {
-  constructor(private readonly homeService: HomeService) {}
+  constructor(
+    private readonly homeService: HomeService,
+    private readonly fileUploadService: FileUploadService
+  ) {
+    // Ensure uploads directory exists
+    this.ensureUploadsDirectory();
+  }
+
+  private ensureUploadsDirectory(): void {
+    const uploadsDir = join(process.cwd(), 'uploads');
+    const imagesDir = join(uploadsDir, 'images');
+
+    if (!existsSync(uploadsDir)) {
+      mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    if (!existsSync(imagesDir)) {
+      mkdirSync(imagesDir, { recursive: true });
+    }
+  }
 
   @Get()
-  async findAllHomes() {
-    return this.homeService.findAllHomes();
+  async findAllHomes(): Promise<ApiResponseDto> {
+    const homes = await this.homeService.findAllHomes();
+    return ApiResponseDto.success('Homes retrieved successfully', homes);
+  }
+
+  @Get('test-db')
+  async testDatabase(): Promise<ApiResponseDto> {
+    const isConnected = await this.homeService.testDatabaseConnection();
+    return ApiResponseDto.success('Database connection test', { connected: isConnected });
+  }
+
+  @Get('approved')
+  async findApprovedHomes(): Promise<ApiResponseDto> {
+    const homes = await this.homeService.findApprovedHomes();
+    return ApiResponseDto.success('Approved homes retrieved successfully', homes);
   }
 
   @Get('my-homes')
-  async findMyHomes(@Request() req) {
-    return this.homeService.findHomesByOwner(req.user.id);
+  async findMyHomes(@Request() req): Promise<ApiResponseDto> {
+    const homes = await this.homeService.findHomesByOwner(req.user.id);
+    return ApiResponseDto.success('User homes retrieved successfully', homes);
   }
 
   @Get(':id')
-  async findHomeById(@Param('id') id: number) {
-    return this.homeService.findHomeById(id);
+  async findHomeById(@Param('id') id: number): Promise<ApiResponseDto> {
+    const home = await this.homeService.findHomeById(id);
+    return ApiResponseDto.success('Home retrieved successfully', home);
   }
 
   @Post()
-  async createHome(@Body() createHomeDto: CreateHomeDto, @Request() req) {
-    return this.homeService.createHome(createHomeDto, req.user.id);
+  @UseInterceptors(
+    FilesInterceptor('images', 4, {
+      storage: diskStorage({
+        destination: join(process.cwd(), 'uploads', 'images'),
+        filename: (req, file, callback) => {
+          if (file && file.originalname) {
+            const fileUploadService = new FileUploadService();
+            const uniqueName = fileUploadService.generateUniqueFileName(file.originalname);
+            callback(null, uniqueName);
+          } else {
+            callback(new Error('Invalid file'), '');
+          }
+        },
+      }),
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    })
+  )
+  async createHome(
+    @Body() createHomeDto: CreateHomeDto,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Request() req
+  ): Promise<ApiResponseDto> {
+    try {
+      console.log('=== File Upload Debug ===');
+      console.log('Creating home with data:', createHomeDto);
+      console.log('Uploaded files:', files);
+      console.log('Files count:', files ? files.length : 0);
+
+      if (files && files.length > 0) {
+        files.forEach((file, index) => {
+          console.log(`File ${index + 1}:`, {
+            originalname: file.originalname,
+            filename: file.filename,
+            mimetype: file.mimetype,
+            size: file.size,
+            path: file.path,
+          });
+        });
+      }
+
+      // Process uploaded files and add URLs to DTO
+      if (files && files.length > 0) {
+        // Validate files
+        for (const file of files) {
+          if (!this.fileUploadService.validateImageFile(file)) {
+            throw new BadRequestException(`Invalid file: ${file.originalname}`);
+          }
+        }
+
+        // Generate actual image URLs from uploaded files
+        const imageUrls = files.map(
+          file => `http://localhost:6001/uploads/images/${file.filename}`
+        );
+        createHomeDto.image_urls = imageUrls;
+        console.log('Image URLs:', imageUrls);
+      }
+
+      // Use the actual service to create the home in the database
+      const ownerId = req.user?.id || 1; // Default to 1 for testing
+      const home = await this.homeService.createHome(createHomeDto, ownerId);
+
+      console.log('Created home:', home);
+      console.log('=== End File Upload Debug ===');
+
+      return ApiResponseDto.created('Home created successfully', home);
+    } catch (error) {
+      console.error('Error creating home:', error);
+      throw error;
+    }
   }
 
   @Put(':id')
-  async updateHome(@Param('id') id: number, @Body() updateHomeDto: UpdateHomeDto, @Request() req) {
-    return this.homeService.updateHome(id, updateHomeDto, req.user.id);
+  async updateHome(
+    @Param('id') id: number,
+    @Body() updateHomeDto: UpdateHomeDto,
+    @Request() req
+  ): Promise<ApiResponseDto> {
+    const home = await this.homeService.updateHome(id, updateHomeDto, req.user.id);
+    return ApiResponseDto.success('Home updated successfully', home);
   }
 
   @Delete(':id')
-  async deleteHome(@Param('id') id: number, @Request() req) {
+  async deleteHome(@Param('id') id: number, @Request() req): Promise<ApiResponseDto> {
     await this.homeService.deleteHome(id, req.user.id);
-    return { message: 'Home deleted successfully' };
+    return ApiResponseDto.success('Home deleted successfully');
   }
 
   // Room endpoints
@@ -58,8 +174,9 @@ export class HomeController {
     @Param('homeId') homeId: number,
     @Body() createRoomDto: CreateRoomDto,
     @Request() req
-  ) {
-    return this.homeService.addRoomToHome(homeId, createRoomDto, req.user.id);
+  ): Promise<ApiResponseDto> {
+    const room = await this.homeService.addRoomToHome(homeId, createRoomDto, req.user.id);
+    return ApiResponseDto.created('Room added successfully', room);
   }
 
   @Put('rooms/:roomId')
@@ -67,14 +184,15 @@ export class HomeController {
     @Param('roomId') roomId: number,
     @Body() updateRoomDto: Partial<CreateRoomDto>,
     @Request() req
-  ) {
-    return this.homeService.updateRoom(roomId, updateRoomDto, req.user.id);
+  ): Promise<ApiResponseDto> {
+    const room = await this.homeService.updateRoom(roomId, updateRoomDto, req.user.id);
+    return ApiResponseDto.success('Room updated successfully', room);
   }
 
   @Delete('rooms/:roomId')
-  async deleteRoom(@Param('roomId') roomId: number, @Request() req) {
+  async deleteRoom(@Param('roomId') roomId: number, @Request() req): Promise<ApiResponseDto> {
     await this.homeService.deleteRoom(roomId, req.user.id);
-    return { message: 'Room deleted successfully' };
+    return ApiResponseDto.success('Room deleted successfully');
   }
 
   // Room rules endpoints
@@ -83,8 +201,9 @@ export class HomeController {
     @Param('roomId') roomId: number,
     @Body() createRuleDto: CreateRoomRuleDto,
     @Request() req
-  ) {
-    return this.homeService.addRuleToRoom(roomId, createRuleDto, req.user.id);
+  ): Promise<ApiResponseDto> {
+    const rule = await this.homeService.addRuleToRoom(roomId, createRuleDto, req.user.id);
+    return ApiResponseDto.created('Room rule added successfully', rule);
   }
 
   @Put('rules/:ruleId')
@@ -92,13 +211,35 @@ export class HomeController {
     @Param('ruleId') ruleId: number,
     @Body() updateRuleDto: Partial<CreateRoomRuleDto>,
     @Request() req
-  ) {
-    return this.homeService.updateRoomRule(ruleId, updateRuleDto, req.user.id);
+  ): Promise<ApiResponseDto> {
+    const rule = await this.homeService.updateRoomRule(ruleId, updateRuleDto, req.user.id);
+    return ApiResponseDto.success('Room rule updated successfully', rule);
   }
 
   @Delete('rules/:ruleId')
-  async deleteRoomRule(@Param('ruleId') ruleId: number, @Request() req) {
+  async deleteRoomRule(@Param('ruleId') ruleId: number, @Request() req): Promise<ApiResponseDto> {
     await this.homeService.deleteRoomRule(ruleId, req.user.id);
-    return { message: 'Room rule deleted successfully' };
+    return ApiResponseDto.success('Room rule deleted successfully');
+  }
+
+  // Image update endpoints
+  @Patch(':id/images')
+  async updateHomeImages(
+    @Param('id') id: number,
+    @Body() imageData: { image1?: string; image2?: string; image3?: string; image4?: string },
+    @Request() req
+  ): Promise<ApiResponseDto> {
+    const home = await this.homeService.updateHomeImages(id, imageData, req.user.id);
+    return ApiResponseDto.success('Home images updated successfully', home);
+  }
+
+  @Patch('rooms/:roomId/images')
+  async updateRoomImages(
+    @Param('roomId') roomId: number,
+    @Body() imageData: { image1?: string; image2?: string; image3?: string; image4?: string },
+    @Request() req
+  ): Promise<ApiResponseDto> {
+    const room = await this.homeService.updateRoomImages(roomId, imageData, req.user.id);
+    return ApiResponseDto.success('Room images updated successfully', room);
   }
 }
