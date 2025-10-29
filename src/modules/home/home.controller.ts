@@ -15,7 +15,8 @@ import { HomeService } from './home.service';
 import { CreateHomeDto } from './dto/create-home.dto';
 import { UpdateHomeDto } from './dto/update-home.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
-import { CreateRoomRuleDto } from './dto/create-room-rule.dto';
+import { CreateRuleDto } from './dto/create-rule.dto';
+import { AssignRoomRuleDto } from './dto/assign-room-rule.dto';
 import { ApiResponseDto } from '../../common/dto/api-response.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { FileUploadService } from '../../common/services/file-upload.service';
@@ -70,6 +71,13 @@ export class HomeController {
   async findMyHomes(@Request() req): Promise<ApiResponseDto> {
     const homes = await this.homeService.findHomesByOwner(req.user.id);
     return ApiResponseDto.success('User homes retrieved successfully', homes);
+  }
+
+  // Rules endpoints
+  @Get('rules')
+  async getAllRules(): Promise<ApiResponseDto> {
+    const rules = await this.homeService.getAllRules();
+    return ApiResponseDto.success('Rules retrieved successfully', rules);
   }
 
   @Get(':id')
@@ -205,29 +213,35 @@ export class HomeController {
     return ApiResponseDto.success('Room deleted successfully');
   }
 
+  @Post('rules')
+  async createRule(@Body() createRuleDto: CreateRuleDto): Promise<ApiResponseDto> {
+    const rule = await this.homeService.createRule(createRuleDto);
+    return ApiResponseDto.created('Rule created successfully', rule);
+  }
+
   // Room rules endpoints
   @Post('rooms/:roomId/rules')
-  async addRuleToRoom(
+  async assignRuleToRoom(
     @Param('roomId') roomId: number,
-    @Body() createRuleDto: CreateRoomRuleDto,
+    @Body() assignRuleDto: AssignRoomRuleDto,
     @Request() req
   ): Promise<ApiResponseDto> {
     // Use default user ID when authentication is disabled
     const userId = req.user?.id || 1;
-    const rule = await this.homeService.addRuleToRoom(roomId, createRuleDto, userId);
-    return ApiResponseDto.created('Room rule added successfully', rule);
+    const roomRule = await this.homeService.assignRuleToRoom(roomId, assignRuleDto, userId);
+    return ApiResponseDto.created('Rule assigned to room successfully', roomRule);
   }
 
   @Put('rules/:ruleId')
   async updateRoomRule(
     @Param('ruleId') ruleId: number,
-    @Body() updateRuleDto: Partial<CreateRoomRuleDto>,
+    @Body() assignRuleDto: AssignRoomRuleDto,
     @Request() req
   ): Promise<ApiResponseDto> {
     // Use default user ID when authentication is disabled
     const userId = req.user?.id || 1;
-    const rule = await this.homeService.updateRoomRule(ruleId, updateRuleDto, userId);
-    return ApiResponseDto.success('Room rule updated successfully', rule);
+    const roomRule = await this.homeService.updateRoomRule(ruleId, assignRuleDto, userId);
+    return ApiResponseDto.success('Room rule updated successfully', roomRule);
   }
 
   @Delete('rules/:ruleId')

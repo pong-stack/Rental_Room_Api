@@ -1,13 +1,16 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, In } from 'typeorm';
 import { Home, VerificationStatus } from '../../entities/home.entity';
 import { Room } from '../../entities/room.entity';
 import { RoomRule } from '../../entities/room-rule.entity';
+import { Rule } from '../../entities/rule.entity';
 import { CreateHomeDto } from './dto/create-home.dto';
 import { UpdateHomeDto } from './dto/update-home.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { CreateRoomRuleDto } from './dto/create-room-rule.dto';
+import { CreateRuleDto } from './dto/create-rule.dto';
+import { AssignRoomRuleDto } from './dto/assign-room-rule.dto';
 
 @Injectable()
 export class HomeService {
@@ -17,7 +20,9 @@ export class HomeService {
     @InjectRepository(Room)
     private roomRepository: Repository<Room>,
     @InjectRepository(RoomRule)
-    private roomRuleRepository: Repository<RoomRule>
+    private roomRuleRepository: Repository<RoomRule>,
+    @InjectRepository(Rule)
+    private ruleRepository: Repository<Rule>
   ) {}
 
   async testDatabaseConnection(): Promise<boolean> {
@@ -86,7 +91,7 @@ export class HomeService {
     try {
       console.log('=== HomeService.findAllHomes Debug ===');
       const homes = await this.homeRepository.find({
-        relations: ['owner', 'rooms', 'rooms.rules'],
+        relations: ['owner', 'rooms', 'rooms.rules', 'rooms.rules.rule'],
       });
       console.log('Found homes:', homes);
       console.log('Number of homes:', homes.length);
@@ -100,7 +105,7 @@ export class HomeService {
 
   async findApprovedHomes(): Promise<Home[]> {
     return this.homeRepository.find({
-      relations: ['owner', 'rooms', 'rooms.rules'],
+      relations: ['owner', 'rooms', 'rooms.rules', 'rooms.rules.rule'],
       where: { verificationStatus: VerificationStatus.APPROVED },
     });
   }
@@ -108,7 +113,7 @@ export class HomeService {
   async findHomeById(id: number): Promise<Home> {
     const home = await this.homeRepository.findOne({
       where: { id },
-      relations: ['owner', 'rooms', 'rooms.rules'],
+      relations: ['owner', 'rooms', 'rooms.rules', 'rooms.rules.rule'],
     });
 
     if (!home) {
@@ -121,7 +126,7 @@ export class HomeService {
   async findHomesByOwner(ownerId: number): Promise<Home[]> {
     return this.homeRepository.find({
       where: { ownerId },
-      relations: ['rooms', 'rooms.rules'],
+      relations: ['rooms', 'rooms.rules', 'rooms.rules.rule'],
     });
   }
 
@@ -169,12 +174,22 @@ export class HomeService {
       throw new ForbiddenException('You can only add rooms to your own homes');
     }
 
+    // Extract ruleIds from DTO before creating room
+    const { ruleIds, ...roomData } = createRoomDto;
+
     const room = this.roomRepository.create({
-      ...createRoomDto,
+      ...roomData,
       homeId,
     });
 
-    return this.roomRepository.save(room);
+    const savedRoom = await this.roomRepository.save(room);
+
+    // Assign rules if provided
+    if (ruleIds && ruleIds.length > 0) {
+      await this.assignMultipleRulesToRoom(savedRoom.id, ruleIds, ownerId);
+    }
+
+    return savedRoom;
   }
 
   async updateRoom(
@@ -216,10 +231,28 @@ export class HomeService {
     await this.roomRepository.remove(room);
   }
 
+  // Rule management
+  async getAllRules(): Promise<Rule[]> {
+    try {
+      console.log('=== HomeService.getAllRules Debug ===');
+      const rules = await this.ruleRepository.find({
+        where: { isActive: true },
+        order: { ruleTitle: 'ASC' },
+      });
+      console.log('Found rules:', rules);
+      console.log('Number of rules:', rules.length);
+      console.log('=== End Debug ===');
+      return rules;
+    } catch (error) {
+      console.error('Error in HomeService.getAllRules:', error);
+      throw error;
+    }
+  }
+
   // Room rules management
-  async addRuleToRoom(
+  async assignRuleToRoom(
     roomId: number,
-    createRuleDto: CreateRoomRuleDto,
+    assignRuleDto: AssignRoomRuleDto,
     ownerId: number
   ): Promise<RoomRule> {
     const room = await this.roomRepository.findOne({
@@ -235,34 +268,126 @@ export class HomeService {
       throw new ForbiddenException('You can only add rules to rooms in your own homes');
     }
 
-    const rule = this.roomRuleRepository.create({
-      ...createRuleDto,
-      roomId,
+    // Check if the rule exists and is active
+    const rule = await this.ruleRepository.findOne({
+      where: { id: assignRuleDto.ruleId, isActive: true },
     });
 
-    return this.roomRuleRepository.save(rule);
+    if (!rule) {
+      throw new NotFoundException('Rule not found or inactive');
+    }
+
+    // Check if this rule is already assigned to this room
+    const existingRoomRule = await this.roomRuleRepository.findOne({
+      where: { roomId, ruleId: assignRuleDto.ruleId },
+    });
+
+    if (existingRoomRule) {
+      throw new ForbiddenException('This rule is already assigned to this room');
+    }
+
+    const roomRule = this.roomRuleRepository.create({
+      roomId,
+      ruleId: assignRuleDto.ruleId,
+    });
+
+    return this.roomRuleRepository.save(roomRule);
+  }
+
+  async assignMultipleRulesToRoom(
+    roomId: number,
+    ruleIds: number[],
+    ownerId: number
+  ): Promise<RoomRule[]> {
+    const room = await this.roomRepository.findOne({
+      where: { id: roomId },
+      relations: ['home'],
+    });
+
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    if (room.home.ownerId !== ownerId) {
+      throw new ForbiddenException('You can only add rules to rooms in your own homes');
+    }
+
+    // Validate that all rules exist and are active
+    const rules = await this.ruleRepository.find({
+      where: { id: In(ruleIds), isActive: true },
+    });
+
+    if (rules.length !== ruleIds.length) {
+      const foundRuleIds = rules.map(rule => rule.id);
+      const missingRuleIds = ruleIds.filter(id => !foundRuleIds.includes(id));
+      throw new NotFoundException(`Rules not found or inactive: ${missingRuleIds.join(', ')}`);
+    }
+
+    // Check for existing assignments
+    const existingRoomRules = await this.roomRuleRepository.find({
+      where: { roomId, ruleId: In(ruleIds) },
+    });
+
+    if (existingRoomRules.length > 0) {
+      const existingRuleIds = existingRoomRules.map(rr => rr.ruleId);
+      throw new ForbiddenException(
+        `Rules already assigned to this room: ${existingRuleIds.join(', ')}`
+      );
+    }
+
+    // Create room rule assignments
+    const roomRules = ruleIds.map(ruleId =>
+      this.roomRuleRepository.create({
+        roomId,
+        ruleId,
+      })
+    );
+
+    return this.roomRuleRepository.save(roomRules);
   }
 
   async updateRoomRule(
     ruleId: number,
-    updateRuleDto: Partial<CreateRoomRuleDto>,
+    assignRuleDto: AssignRoomRuleDto,
     ownerId: number
   ): Promise<RoomRule> {
-    const rule = await this.roomRuleRepository.findOne({
+    const roomRule = await this.roomRuleRepository.findOne({
       where: { id: ruleId },
       relations: ['room', 'room.home'],
     });
 
-    if (!rule) {
+    if (!roomRule) {
       throw new NotFoundException('Room rule not found');
     }
 
-    if (rule.room.home.ownerId !== ownerId) {
+    if (roomRule.room.home.ownerId !== ownerId) {
       throw new ForbiddenException('You can only update rules for rooms in your own homes');
     }
 
-    Object.assign(rule, updateRuleDto);
-    return this.roomRuleRepository.save(rule);
+    // Check if the new rule exists and is active
+    const rule = await this.ruleRepository.findOne({
+      where: { id: assignRuleDto.ruleId, isActive: true },
+    });
+
+    if (!rule) {
+      throw new NotFoundException('Rule not found or inactive');
+    }
+
+    // Check if this rule is already assigned to this room (excluding current assignment)
+    const existingRoomRule = await this.roomRuleRepository.findOne({
+      where: {
+        roomId: roomRule.roomId,
+        ruleId: assignRuleDto.ruleId,
+        id: Not(ruleId), // Exclude current assignment
+      },
+    });
+
+    if (existingRoomRule) {
+      throw new ForbiddenException('This rule is already assigned to this room');
+    }
+
+    roomRule.ruleId = assignRuleDto.ruleId;
+    return this.roomRuleRepository.save(roomRule);
   }
 
   async deleteRoomRule(ruleId: number, ownerId: number): Promise<void> {
@@ -333,5 +458,16 @@ export class HomeService {
     if (imageData.image4 !== undefined) room.image4 = imageData.image4;
 
     return this.roomRepository.save(room);
+  }
+
+  // Rule management methods
+  async createRule(createRuleDto: CreateRuleDto): Promise<Rule> {
+    const rule = this.ruleRepository.create({
+      ruleTitle: createRuleDto.ruleTitle,
+      ruleDescription: createRuleDto.ruleDescription,
+      isActive: createRuleDto.isActive !== undefined ? createRuleDto.isActive : true,
+    });
+
+    return this.ruleRepository.save(rule);
   }
 }
