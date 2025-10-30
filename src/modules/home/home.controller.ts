@@ -142,7 +142,7 @@ export class HomeController {
         const imageUrls = files.map(
           file => `http://localhost:6001/uploads/images/${file.filename}`
         );
-        createHomeDto.image_urls = imageUrls;
+        createHomeDto.images = imageUrls;
         console.log('Image URLs:', imageUrls);
       }
 
@@ -261,7 +261,11 @@ export class HomeController {
   ): Promise<ApiResponseDto> {
     // Use default user ID when authentication is disabled
     const userId = req.user?.id || 1;
-    const home = await this.homeService.updateHomeImages(id, imageData, userId);
+    // Map image1, image2, ... to array if they exist
+    const images = [imageData.image1, imageData.image2, imageData.image3, imageData.image4].filter(
+      (img): img is string => !!img
+    );
+    const home = await this.homeService.updateHomeImages(id, { images }, userId);
     return ApiResponseDto.success('Home images updated successfully', home);
   }
 
@@ -273,7 +277,11 @@ export class HomeController {
   ): Promise<ApiResponseDto> {
     // Use default user ID when authentication is disabled
     const userId = req.user?.id || 1;
-    const room = await this.homeService.updateRoomImages(roomId, imageData, userId);
+    // Map image1, image2, ... to array if they exist
+    const images = [imageData.image1, imageData.image2, imageData.image3, imageData.image4].filter(
+      (img): img is string => !!img
+    );
+    const room = await this.homeService.updateRoomImages(roomId, { images }, userId);
     return ApiResponseDto.success('Room images updated successfully', room);
   }
 }

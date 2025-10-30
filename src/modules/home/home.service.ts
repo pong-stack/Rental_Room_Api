@@ -44,22 +44,14 @@ export class HomeService {
       console.log('Input DTO:', createHomeDto);
       console.log('Owner ID:', ownerId);
 
-      // Extract image_urls and map to individual image columns
-      const { image_urls, ...homeData } = createHomeDto;
+      // Extract images array from DTO
+      const { images, ...homeData } = createHomeDto;
 
-      // Map image_urls array to individual image columns
-      const imageMapping = {
-        image1: image_urls?.[0] || homeData.image1,
-        image2: image_urls?.[1] || homeData.image2,
-        image3: image_urls?.[2] || homeData.image3,
-        image4: image_urls?.[3] || homeData.image4,
-      };
-
-      console.log('Image mapping:', imageMapping);
+      console.log('Images array:', images);
 
       const homeDataToSave = {
         ...homeData,
-        ...imageMapping,
+        images: images || [],
         ownerId,
       };
 
@@ -137,15 +129,12 @@ export class HomeService {
       throw new ForbiddenException('You can only update your own homes');
     }
 
-    // Extract image_urls and map to individual image columns
-    const { image_urls, ...homeData } = updateHomeDto;
+    // Extract images array from DTO
+    const { images, ...homeData } = updateHomeDto;
 
-    // Map image_urls array to individual image columns if provided
-    if (image_urls) {
-      home.image1 = image_urls[0] ?? home.image1;
-      home.image2 = image_urls[1] ?? home.image2;
-      home.image3 = image_urls[2] ?? home.image3;
-      home.image4 = image_urls[3] ?? home.image4;
+    // Update images if provided
+    if (images !== undefined) {
+      home.images = images;
     }
 
     Object.assign(home, homeData);
@@ -409,7 +398,7 @@ export class HomeService {
 
   async updateHomeImages(
     homeId: number,
-    imageData: { image1?: string; image2?: string; image3?: string; image4?: string },
+    imageData: { images?: string[] },
     ownerId: number
   ): Promise<Home> {
     const home = await this.homeRepository.findOne({
@@ -424,18 +413,17 @@ export class HomeService {
       throw new ForbiddenException('You can only update images for your own homes');
     }
 
-    // Update only the provided image fields
-    if (imageData.image1 !== undefined) home.image1 = imageData.image1;
-    if (imageData.image2 !== undefined) home.image2 = imageData.image2;
-    if (imageData.image3 !== undefined) home.image3 = imageData.image3;
-    if (imageData.image4 !== undefined) home.image4 = imageData.image4;
+    // Update images if provided
+    if (imageData.images !== undefined) {
+      home.images = imageData.images;
+    }
 
     return this.homeRepository.save(home);
   }
 
   async updateRoomImages(
     roomId: number,
-    imageData: { image1?: string; image2?: string; image3?: string; image4?: string },
+    imageData: { images?: string[] },
     ownerId: number
   ): Promise<Room> {
     const room = await this.roomRepository.findOne({
@@ -451,11 +439,10 @@ export class HomeService {
       throw new ForbiddenException('You can only update images for rooms in your own homes');
     }
 
-    // Update only the provided image fields
-    if (imageData.image1 !== undefined) room.image1 = imageData.image1;
-    if (imageData.image2 !== undefined) room.image2 = imageData.image2;
-    if (imageData.image3 !== undefined) room.image3 = imageData.image3;
-    if (imageData.image4 !== undefined) room.image4 = imageData.image4;
+    // Update images if provided
+    if (imageData.images !== undefined) {
+      room.images = imageData.images;
+    }
 
     return this.roomRepository.save(room);
   }

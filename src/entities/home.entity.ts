@@ -36,17 +36,8 @@ export class Home {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ name: 'image_1', type: 'varchar', length: 500, nullable: true })
-  image1: string;
-
-  @Column({ name: 'image_2', type: 'varchar', length: 500, nullable: true })
-  image2: string;
-
-  @Column({ name: 'image_3', type: 'varchar', length: 500, nullable: true })
-  image3: string;
-
-  @Column({ name: 'image_4', type: 'varchar', length: 500, nullable: true })
-  image4: string;
+  @Column({ type: 'json', nullable: true })
+  images: string[];
 
   @Column({
     name: 'verification_status',

@@ -24,23 +24,7 @@ export class CreateHomeDto {
 
   @IsOptional()
   @IsArray()
-  @ArrayMaxSize(4)
-  image_urls?: string[];
-
-  // Keep individual image fields for backward compatibility
-  @IsOptional()
-  @IsUrl()
-  image1?: string;
-
-  @IsOptional()
-  @IsUrl()
-  image2?: string;
-
-  @IsOptional()
-  @IsUrl()
-  image3?: string;
-
-  @IsOptional()
-  @IsUrl()
-  image4?: string;
+  @ArrayMaxSize(10)
+  @IsUrl({}, { each: true })
+  images?: string[];
 }

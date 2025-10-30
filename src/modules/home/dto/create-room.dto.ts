@@ -7,6 +7,7 @@ import {
   IsUrl,
   IsArray,
   IsInt,
+  ArrayMaxSize,
 } from 'class-validator';
 
 export class CreateRoomDto {
@@ -32,22 +33,12 @@ export class CreateRoomDto {
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(10)
+  @IsUrl({}, { each: true })
+  images?: string[];
+
+  @IsOptional()
+  @IsArray()
   @IsInt({ each: true })
   ruleIds?: number[];
-
-  @IsOptional()
-  @IsUrl()
-  image1?: string;
-
-  @IsOptional()
-  @IsUrl()
-  image2?: string;
-
-  @IsOptional()
-  @IsUrl()
-  image3?: string;
-
-  @IsOptional()
-  @IsUrl()
-  image4?: string;
 }
