@@ -11,8 +11,12 @@ import {
 } from 'class-validator';
 
 export class CreateRoomDto {
+  @IsNumber()
+  @IsInt()
+  homeId: number;
+
   @IsString()
-  name: string;
+  roomName: string;
 
   @IsNumber()
   @Min(0)

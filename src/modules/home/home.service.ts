@@ -163,11 +163,15 @@ export class HomeService {
       throw new ForbiddenException('You can only add rooms to your own homes');
     }
 
-    // Extract ruleIds from DTO before creating room
-    const { ruleIds, ...roomData } = createRoomDto;
+    // Extract ruleIds and roomName from DTO before creating room
+    const { ruleIds, roomName, price, capacity, isAvailable, images } = createRoomDto;
 
     const room = this.roomRepository.create({
-      ...roomData,
+      price,
+      capacity,
+      isAvailable,
+      images,
+      name: roomName as string,
       homeId,
     });
 
@@ -199,7 +203,13 @@ export class HomeService {
       throw new ForbiddenException('You can only update rooms in your own homes');
     }
 
-    Object.assign(room, updateRoomDto);
+    // Map roomName to name if provided
+    const { roomName, ...updateData } = updateRoomDto;
+    const updatePayload: Partial<Room> = roomName
+      ? { ...updateData, name: roomName as string }
+      : updateData;
+
+    Object.assign(room, updatePayload);
     return this.roomRepository.save(room);
   }
 

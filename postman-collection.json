@@ -338,7 +338,19 @@
           }
         },
         {
-          "name": "Add Room to Home",
+          "name": "Test Database Connection",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/homes/test-db",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "test-db"]
+            }
+          }
+        },
+        {
+          "name": "Create Rule",
           "request": {
             "method": "POST",
             "header": [
@@ -353,12 +365,83 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Master Bedroom\",\n  \"price\": 150.00,\n  \"capacity\": 2,\n  \"isAvailable\": true\n}"
+              "raw": "{\n  \"ruleTitle\": \"No Smoking\",\n  \"ruleDescription\": \"Smoking is strictly prohibited in all areas\",\n  \"isActive\": true\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/homes/1/rooms",
+              "raw": "{{baseUrl}}/homes/rules",
               "host": ["{{baseUrl}}"],
-              "path": ["homes", "1", "rooms"]
+              "path": ["homes", "rules"]
+            }
+          }
+        },
+        {
+          "name": "Get All Rules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/homes/rules",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "rules"]
+            }
+          }
+        },
+        {
+          "name": "Add Room to Home",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "homeId",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "roomName",
+                  "value": "Master Bedroom",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "150.0",
+                  "type": "text"
+                },
+                {
+                  "key": "capacity",
+                  "value": "2",
+                  "type": "text"
+                },
+                {
+                  "key": "isAvailable",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "ruleIds",
+                  "value": "[1, 2, 3]",
+                  "type": "text",
+                  "description": "JSON array string: [1, 2, 3]"
+                },
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": [],
+                  "description": "Upload image files (up to 10 files, 5MB each)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/homes/rooms",
+              "host": ["{{baseUrl}}"],
+              "path": ["homes", "rooms"]
             }
           }
         },
@@ -378,7 +461,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Room Name\",\n  \"price\": 200.00,\n  \"capacity\": 3,\n  \"isAvailable\": false\n}"
+              "raw": "{\n  \"roomName\": \"Updated Room Name\",\n  \"price\": 200.0,\n  \"capacity\": 3,\n  \"isAvailable\": false,\n  \"images\": [\"http://localhost:6001/uploads/images/updated-room.jpg\"],\n  \"ruleIds\": [1, 4]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/homes/rooms/1",
@@ -405,7 +488,7 @@
           }
         },
         {
-          "name": "Add Room Rule",
+          "name": "Assign Rule to Room",
           "request": {
             "method": "POST",
             "header": [
@@ -420,7 +503,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"ruleTitle\": \"No Smoking\",\n  \"ruleDescription\": \"Smoking is not allowed in this room\"\n}"
+              "raw": "{\n  \"ruleId\": 1\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/homes/rooms/1/rules",
@@ -445,13 +528,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"ruleTitle\": \"Updated Rule\",\n  \"ruleDescription\": \"Updated rule description\"\n}"
+              "raw": "{\n  \"ruleId\": 2\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/homes/rules/1",
               "host": ["{{baseUrl}}"],
               "path": ["homes", "rules", "1"]
-            }
+            },
+            "description": "Note: This updates a room-rule relationship (ID 1), not the rule itself. The ruleId in the body is the new rule to assign."
           }
         },
         {
@@ -468,7 +552,8 @@
               "raw": "{{baseUrl}}/homes/rules/1",
               "host": ["{{baseUrl}}"],
               "path": ["homes", "rules", "1"]
-            }
+            },
+            "description": "Note: This deletes the room-rule relationship (ID 1), not the rule itself."
           }
         },
         {
@@ -479,23 +564,22 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
             ],
             "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "images",
-                  "type": "file",
-                  "src": []
-                }
-              ]
+              "mode": "raw",
+              "raw": "{\n  \"image1\": \"http://localhost:6001/uploads/images/image1.jpg\",\n  \"image2\": \"http://localhost:6001/uploads/images/image2.jpg\",\n  \"image3\": \"http://localhost:6001/uploads/images/image3.jpg\",\n  \"image4\": \"http://localhost:6001/uploads/images/image4.jpg\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/homes/1/images",
               "host": ["{{baseUrl}}"],
               "path": ["homes", "1", "images"]
-            }
+            },
+            "description": "All image fields are optional. Only include the images you want to update."
           }
         },
         {
@@ -506,23 +590,22 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
             ],
             "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "images",
-                  "type": "file",
-                  "src": []
-                }
-              ]
+              "mode": "raw",
+              "raw": "{\n  \"image1\": \"http://localhost:6001/uploads/images/room1.jpg\",\n  \"image2\": \"http://localhost:6001/uploads/images/room2.jpg\",\n  \"image3\": \"http://localhost:6001/uploads/images/room3.jpg\",\n  \"image4\": \"http://localhost:6001/uploads/images/room4.jpg\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/homes/rooms/1/images",
               "host": ["{{baseUrl}}"],
               "path": ["homes", "rooms", "1", "images"]
-            }
+            },
+            "description": "All image fields are optional. Only include the images you want to update."
           }
         }
       ]

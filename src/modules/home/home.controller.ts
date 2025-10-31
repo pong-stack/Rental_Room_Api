@@ -181,16 +181,83 @@ export class HomeController {
   }
 
   // Room endpoints
-  @Post(':homeId/rooms')
+  @Post('rooms')
+  @UseInterceptors(
+    FilesInterceptor('images', 10, {
+      storage: diskStorage({
+        destination: join(process.cwd(), 'uploads', 'images'),
+        filename: (req, file, callback) => {
+          if (file && file.originalname) {
+            const fileUploadService = new FileUploadService();
+            const uniqueName = fileUploadService.generateUniqueFileName(file.originalname);
+            callback(null, uniqueName);
+          } else {
+            callback(new Error('Invalid file'), '');
+          }
+        },
+      }),
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    })
+  )
   async addRoomToHome(
-    @Param('homeId') homeId: number,
     @Body() createRoomDto: CreateRoomDto,
+    @UploadedFiles() files: Express.Multer.File[],
     @Request() req
   ): Promise<ApiResponseDto> {
-    // Use default user ID when authentication is disabled
-    const userId = req.user?.id || 1;
-    const room = await this.homeService.addRoomToHome(homeId, createRoomDto, userId);
-    return ApiResponseDto.created('Room added successfully', room);
+    try {
+      // Handle form-data type conversions (form-data sends everything as strings)
+      if (typeof createRoomDto.homeId === 'string') {
+        createRoomDto.homeId = parseInt(createRoomDto.homeId, 10);
+      }
+      if (typeof createRoomDto.price === 'string') {
+        createRoomDto.price = parseFloat(createRoomDto.price);
+      }
+      if (createRoomDto.capacity && typeof createRoomDto.capacity === 'string') {
+        createRoomDto.capacity = parseInt(createRoomDto.capacity, 10);
+      }
+      if (createRoomDto.isAvailable && typeof createRoomDto.isAvailable === 'string') {
+        createRoomDto.isAvailable = createRoomDto.isAvailable === 'true';
+      }
+
+      // Handle ruleIds from form-data (may come as JSON string)
+      if (createRoomDto.ruleIds && typeof createRoomDto.ruleIds === 'string') {
+        try {
+          createRoomDto.ruleIds = JSON.parse(createRoomDto.ruleIds as any);
+        } catch {
+          throw new BadRequestException('Invalid ruleIds format. Expected JSON array.');
+        }
+      }
+
+      // Process uploaded files and add URLs to DTO
+      if (files && files.length > 0) {
+        // Validate files
+        for (const file of files) {
+          if (!this.fileUploadService.validateImageFile(file)) {
+            throw new BadRequestException(`Invalid file: ${file.originalname}`);
+          }
+        }
+
+        // Generate actual image URLs from uploaded files
+        const imageUrls = files.map(
+          file => `http://localhost:6001/uploads/images/${file.filename}`
+        );
+        createRoomDto.images = imageUrls;
+      }
+
+      // Use default user ID when authentication is disabled
+      const userId = req.user?.id || 1;
+      const room = await this.homeService.addRoomToHome(
+        createRoomDto.homeId,
+        createRoomDto,
+        userId
+      );
+      return ApiResponseDto.created('Room added successfully', room);
+    } catch (error) {
+      console.error('Error creating room:', error);
+      throw error;
+    }
   }
 
   @Put('rooms/:roomId')

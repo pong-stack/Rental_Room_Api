@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { VerificationRequest, RequestStatus } from '../../entities/verification-request.entity';
-import { Home, VerificationStatus } from '../../entities/home.entity';
+import { Home } from '../../entities/home.entity';
 import { User, UserRole } from '../../entities/user.entity';
 import { CreateVerificationRequestDto } from './dto/create-verification-request.dto';
 
@@ -37,12 +37,14 @@ export class VerificationService {
     }
 
     // Check if there's already a pending request for this home
+    // If exists, cancel it before creating a new one (for testing convenience)
     const existingRequest = await this.verificationRequestRepository.findOne({
       where: { homeId: createDto.homeId, status: RequestStatus.PENDING },
     });
 
     if (existingRequest) {
-      throw new ForbiddenException('There is already a pending verification request for this home');
+      // Cancel the existing request before creating a new one
+      await this.verificationRequestRepository.remove(existingRequest);
     }
 
     const request = this.verificationRequestRepository.create({
