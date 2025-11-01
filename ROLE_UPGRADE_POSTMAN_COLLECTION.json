@@ -1,0 +1,463 @@
+{
+  "info": {
+    "_postman_id": "role-upgrade-collection",
+    "name": "Role Upgrade API",
+    "description": "Complete API collection for role upgrade requests - test in Postman",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "userToken",
+      "value": "YOUR_USER_ACCESS_TOKEN",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "YOUR_ADMIN_ACCESS_TOKEN",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "User Endpoints",
+      "item": [
+        {
+          "name": "1. Request Role Upgrade",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestedRole\": \"home_owner\",\n  \"reason\": \"I want to manage my property listings and create homes\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/role-upgrade/request",
+              "host": ["{{baseUrl}}"],
+              "path": ["role-upgrade", "request"]
+            },
+            "description": "Create a new role upgrade request"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"requestedRole\": \"home_owner\",\n  \"reason\": \"I want to manage my property listings\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/role-upgrade/request",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["role-upgrade", "request"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 201,\n  \"message\": \"Role upgrade request created successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"userId\": 5,\n    \"requestedRole\": \"home_owner\",\n    \"status\": \"pending\",\n    \"reason\": \"I want to manage my property listings\",\n    \"adminComment\": null,\n    \"reviewerId\": null,\n    \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n    \"updatedAt\": \"2024-01-15T10:30:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Get My Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/role-upgrade/my-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["role-upgrade", "my-requests"]
+            },
+            "description": "Get all your role upgrade requests"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/role-upgrade/my-requests",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["role-upgrade", "my-requests"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Role upgrade requests retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"userId\": 5,\n      \"requestedRole\": \"home_owner\",\n      \"status\": \"pending\",\n      \"reason\": \"I want to manage my property listings\",\n      \"adminComment\": null,\n      \"reviewerId\": null,\n      \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n      \"updatedAt\": \"2024-01-15T10:30:00.000Z\"\n    },\n    {\n      \"id\": 2,\n      \"userId\": 5,\n      \"requestedRole\": \"home_owner\",\n      \"status\": \"approved\",\n      \"reason\": \"I need to create homes\",\n      \"adminComment\": \"Approved - looks good\",\n      \"reviewerId\": 1,\n      \"createdAt\": \"2024-01-14T09:00:00.000Z\",\n      \"updatedAt\": \"2024-01-14T10:00:00.000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Get Request by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/role-upgrade/my-requests/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["role-upgrade", "my-requests", "1"]
+            },
+            "description": "Get a specific role upgrade request by ID"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/role-upgrade/my-requests/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["role-upgrade", "my-requests", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Role upgrade request retrieved successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"userId\": 5,\n    \"requestedRole\": \"home_owner\",\n    \"status\": \"pending\",\n    \"reason\": \"I want to manage my property listings\",\n    \"adminComment\": null,\n    \"reviewerId\": null,\n    \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n    \"updatedAt\": \"2024-01-15T10:30:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "4. Cancel Pending Request",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/role-upgrade/my-requests/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["role-upgrade", "my-requests", "1"]
+            },
+            "description": "Cancel a pending role upgrade request"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/role-upgrade/my-requests/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["role-upgrade", "my-requests", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Role upgrade request cancelled successfully\",\n  \"data\": null\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin Endpoints",
+      "item": [
+        {
+          "name": "1. Get All Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/role-upgrade/admin/requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["role-upgrade", "admin", "requests"]
+            },
+            "description": "Admin: Get all role upgrade requests"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/role-upgrade/admin/requests",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["role-upgrade", "admin", "requests"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"All role upgrade requests retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"userId\": 5,\n      \"user\": {\n        \"id\": 5,\n        \"email\": \"user@example.com\",\n        \"name\": \"John Doe\"\n      },\n      \"requestedRole\": \"home_owner\",\n      \"status\": \"pending\",\n      \"reason\": \"I want to manage my property listings\",\n      \"adminComment\": null,\n      \"reviewerId\": null,\n      \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n      \"updatedAt\": \"2024-01-15T10:30:00.000Z\"\n    },\n    {\n      \"id\": 2,\n      \"userId\": 6,\n      \"user\": {\n        \"id\": 6,\n        \"email\": \"another@example.com\",\n        \"name\": \"Jane Smith\"\n      },\n      \"requestedRole\": \"home_owner\",\n      \"status\": \"approved\",\n      \"reason\": \"I need to create homes\",\n      \"adminComment\": \"Approved - verified user\",\n      \"reviewerId\": 1,\n      \"createdAt\": \"2024-01-14T09:00:00.000Z\",\n      \"updatedAt\": \"2024-01-14T10:00:00.000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "2. Approve Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adminComment\": \"Approved - User verified and eligible for home_owner role\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/role-upgrade/admin/requests/1/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["role-upgrade", "admin", "requests", "1", "approve"]
+            },
+            "description": "Admin: Approve a role upgrade request"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"adminComment\": \"Approved - User verified\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/role-upgrade/admin/requests/1/approve",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["role-upgrade", "admin", "requests", "1", "approve"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Role upgrade request approved successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"userId\": 5,\n    \"requestedRole\": \"home_owner\",\n    \"status\": \"approved\",\n    \"reason\": \"I want to manage my property listings\",\n    \"adminComment\": \"Approved - User verified and eligible for home_owner role\",\n    \"reviewerId\": 1,\n    \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n    \"updatedAt\": \"2024-01-15T11:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "3. Reject Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adminComment\": \"Rejected - Need more information about your property management needs\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/role-upgrade/admin/requests/1/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["role-upgrade", "admin", "requests", "1", "reject"]
+            },
+            "description": "Admin: Reject a role upgrade request"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"adminComment\": \"Rejected - Need more information\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/role-upgrade/admin/requests/1/reject",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["role-upgrade", "admin", "requests", "1", "reject"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"statusCode\": 200,\n  \"message\": \"Role upgrade request rejected successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"userId\": 5,\n    \"requestedRole\": \"home_owner\",\n    \"status\": \"rejected\",\n    \"reason\": \"I want to manage my property listings\",\n    \"adminComment\": \"Rejected - Need more information about your property management needs\",\n    \"reviewerId\": 1,\n    \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n    \"updatedAt\": \"2024-01-15T11:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Test Examples",
+      "item": [
+        {
+          "name": "Request with reason",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestedRole\": \"home_owner\",\n  \"reason\": \"I am a property owner and need to manage multiple homes and rooms\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/role-upgrade/request",
+              "host": ["{{baseUrl}}"],
+              "path": ["role-upgrade", "request"]
+            }
+          }
+        },
+        {
+          "name": "Request without reason",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requestedRole\": \"home_owner\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/role-upgrade/request",
+              "host": ["{{baseUrl}}"],
+              "path": ["role-upgrade", "request"]
+            }
+          }
+        },
+        {
+          "name": "Approve without comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/role-upgrade/admin/requests/1/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["role-upgrade", "admin", "requests", "1", "approve"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

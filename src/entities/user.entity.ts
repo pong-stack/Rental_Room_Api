@@ -11,6 +11,7 @@ import { hash } from 'bcrypt';
 import { Home } from './home.entity';
 import { VerificationRequest } from './verification-request.entity';
 import { Invoice } from './invoice.entity';
+import { RoleUpgradeRequest } from './role-upgrade-request.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -62,6 +63,12 @@ export class User {
 
   @OneToMany(() => Invoice, invoice => invoice.user)
   invoices: Invoice[];
+
+  @OneToMany(() => RoleUpgradeRequest, request => request.user)
+  roleUpgradeRequests: RoleUpgradeRequest[];
+
+  @OneToMany(() => RoleUpgradeRequest, request => request.reviewer)
+  reviewedRoleUpgrades: RoleUpgradeRequest[];
 
   @BeforeInsert()
   async hashPassword(): Promise<void> {

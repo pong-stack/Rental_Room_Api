@@ -6,6 +6,7 @@ import { Rule } from './src/entities/rule.entity';
 import { VerificationRequest } from './src/entities/verification-request.entity';
 import { Invoice } from './src/entities/invoice.entity';
 import { InvoiceItem } from './src/entities/invoice-item.entity';
+import { RoleUpgradeRequest } from './src/entities/role-upgrade-request.entity';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 import * as dotenv from 'dotenv';
 
@@ -20,7 +21,17 @@ const config: PostgresConnectionOptions = {
   database: process.env.DB_NAME,
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
   logging: process.env.DB_LOGGING === 'true',
-  entities: [User, Home, Room, RoomRule, Rule, VerificationRequest, Invoice, InvoiceItem],
+  entities: [
+    User,
+    Home,
+    Room,
+    RoomRule,
+    Rule,
+    VerificationRequest,
+    Invoice,
+    InvoiceItem,
+    RoleUpgradeRequest,
+  ],
 };
 
 export default config;

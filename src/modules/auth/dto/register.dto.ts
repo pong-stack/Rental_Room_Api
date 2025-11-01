@@ -1,5 +1,4 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
-import { UserRole } from '../../../entities/user.entity';
+import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
 
 export class RegisterDto {
   @IsString()
@@ -14,10 +13,9 @@ export class RegisterDto {
   password: string;
 
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
-
-  @IsOptional()
   @IsString()
   phoneNumber?: string;
+
+  // Note: 'role' field removed. All users register as 'user' by default.
+  // To become 'home_owner', use the role upgrade request system: POST /role-upgrade/request
 }

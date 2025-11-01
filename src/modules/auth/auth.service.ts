@@ -54,7 +54,7 @@ export class AuthService {
       fullName: registerDto.fullName,
       email: registerDto.email,
       password: registerDto.password,
-      role: registerDto.role || UserRole.USER,
+      role: UserRole.USER, // All users register as regular users. Role upgrades require admin approval.
       phoneNumber: registerDto.phoneNumber,
     });
 

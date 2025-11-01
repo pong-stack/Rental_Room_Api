@@ -12,6 +12,7 @@ import { InvoiceModule } from './modules/invoice/invoice.module';
 import { VerificationModule } from './modules/verification/verification.module';
 import { UserModule } from './modules/user/user.module';
 import { BackupModule } from './backup/backup.module';
+import { RoleUpgradeModule } from './modules/role-upgrade/role-upgrade.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { BackupModule } from './backup/backup.module';
     AdminModule,
     InvoiceModule,
     VerificationModule,
+    RoleUpgradeModule,
     BackupModule,
     // Legacy module
   ],
