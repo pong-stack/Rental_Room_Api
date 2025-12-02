@@ -69,7 +69,9 @@ export class HomeController {
 
   @Get('my-homes')
   async findMyHomes(@Request() req): Promise<ApiResponseDto> {
-    const homes = await this.homeService.findHomesByOwner(req.user.id);
+    // Use default user ID when authentication is disabled
+    const userId = req.user?.id || 1;
+    const homes = await this.homeService.findHomesByOwner(userId);
     return ApiResponseDto.success('User homes retrieved successfully', homes);
   }
 
