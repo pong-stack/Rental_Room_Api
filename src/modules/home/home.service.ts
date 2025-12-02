@@ -171,7 +171,7 @@ export class HomeService {
       capacity,
       isAvailable,
       images,
-      name: roomName as string,
+      name: roomName,
       homeId,
     });
 
@@ -205,9 +205,7 @@ export class HomeService {
 
     // Map roomName to name if provided
     const { roomName, ...updateData } = updateRoomDto;
-    const updatePayload: Partial<Room> = roomName
-      ? { ...updateData, name: roomName as string }
-      : updateData;
+    const updatePayload: Partial<Room> = roomName ? { ...updateData, name: roomName } : updateData;
 
     Object.assign(room, updatePayload);
     return this.roomRepository.save(room);

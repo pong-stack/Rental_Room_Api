@@ -29,8 +29,22 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/api/v1')
       .expect(200)
-      .expect(res => {
-        expect(res.body).toEqual({
+      .expect((res: request.Response) => {
+        const body = res.body as {
+          status: number;
+          message: string;
+          data: {
+            message: string;
+            version: string;
+            status: string;
+            endpoints: Record<string, string>;
+          };
+          timestamp: string;
+        };
+
+        expect(body.status).toBe(200);
+        expect(body.message).toBe('Welcome to NestJS API');
+        expect(body.data).toEqual({
           message: 'Welcome to NestJS API',
           version: '1.0.0',
           status: 'running',
@@ -43,6 +57,7 @@ describe('AppController (e2e)', () => {
             verification: '/api/v1/verification',
           },
         });
+        expect(body.timestamp).toBeDefined();
       });
   });
 });

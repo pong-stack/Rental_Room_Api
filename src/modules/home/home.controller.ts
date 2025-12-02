@@ -10,6 +10,7 @@ import {
   Patch,
   UseInterceptors,
   UploadedFiles,
+  UseGuards,
 } from '@nestjs/common';
 import { HomeService } from './home.service';
 import { CreateHomeDto } from './dto/create-home.dto';
@@ -24,9 +25,16 @@ import { diskStorage } from 'multer';
 import { BadRequestException } from '@nestjs/common';
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+interface RequestWithUser {
+  user: {
+    id: number;
+  };
+}
 
 @Controller('homes')
-// @UseGuards(JwtAuthGuard) // Temporarily disabled for testing
+@UseGuards(JwtAuthGuard)
 export class HomeController {
   constructor(
     private readonly homeService: HomeService,
@@ -68,7 +76,7 @@ export class HomeController {
   }
 
   @Get('my-homes')
-  async findMyHomes(@Request() req): Promise<ApiResponseDto> {
+  async findMyHomes(@Request() req: RequestWithUser): Promise<ApiResponseDto> {
     // Use default user ID when authentication is disabled
     const userId = req.user?.id || 1;
     const homes = await this.homeService.findHomesByOwner(userId);
@@ -111,7 +119,7 @@ export class HomeController {
   async createHome(
     @Body() createHomeDto: CreateHomeDto,
     @UploadedFiles() files: Express.Multer.File[],
-    @Request() req
+    @Request() req: RequestWithUser
   ): Promise<ApiResponseDto> {
     try {
       console.log('=== File Upload Debug ===');
@@ -148,9 +156,8 @@ export class HomeController {
         console.log('Image URLs:', imageUrls);
       }
 
-      // Use the actual service to create the home in the database
-      const ownerId = req.user?.id || 1; // Default to 1 for testing
-      const home = await this.homeService.createHome(createHomeDto, ownerId);
+      // Use the authenticated user as owner
+      const home = await this.homeService.createHome(createHomeDto, req.user.id);
 
       console.log('Created home:', home);
       console.log('=== End File Upload Debug ===');
@@ -166,19 +173,18 @@ export class HomeController {
   async updateHome(
     @Param('id') id: number,
     @Body() updateHomeDto: UpdateHomeDto,
-    @Request() req
+    @Request() req: RequestWithUser
   ): Promise<ApiResponseDto> {
-    // Use default user ID when authentication is disabled
-    const userId = req.user?.id || 1;
-    const home = await this.homeService.updateHome(id, updateHomeDto, userId);
+    const home = await this.homeService.updateHome(id, updateHomeDto, req.user.id);
     return ApiResponseDto.success('Home updated successfully', home);
   }
 
   @Delete(':id')
-  async deleteHome(@Param('id') id: number, @Request() req): Promise<ApiResponseDto> {
-    // Use default user ID when authentication is disabled
-    const userId = req.user?.id || 1;
-    await this.homeService.deleteHome(id, userId);
+  async deleteHome(
+    @Param('id') id: number,
+    @Request() req: RequestWithUser
+  ): Promise<ApiResponseDto> {
+    await this.homeService.deleteHome(id, req.user.id);
     return ApiResponseDto.success('Home deleted successfully');
   }
 
@@ -206,7 +212,7 @@ export class HomeController {
   async addRoomToHome(
     @Body() createRoomDto: CreateRoomDto,
     @UploadedFiles() files: Express.Multer.File[],
-    @Request() req
+    @Request() req: RequestWithUser
   ): Promise<ApiResponseDto> {
     try {
       // Handle form-data type conversions (form-data sends everything as strings)
@@ -248,12 +254,10 @@ export class HomeController {
         createRoomDto.images = imageUrls;
       }
 
-      // Use default user ID when authentication is disabled
-      const userId = req.user?.id || 1;
       const room = await this.homeService.addRoomToHome(
         createRoomDto.homeId,
         createRoomDto,
-        userId
+        req.user.id
       );
       return ApiResponseDto.created('Room added successfully', room);
     } catch (error) {
@@ -266,19 +270,18 @@ export class HomeController {
   async updateRoom(
     @Param('roomId') roomId: number,
     @Body() updateRoomDto: Partial<CreateRoomDto>,
-    @Request() req
+    @Request() req: RequestWithUser
   ): Promise<ApiResponseDto> {
-    // Use default user ID when authentication is disabled
-    const userId = req.user?.id || 1;
-    const room = await this.homeService.updateRoom(roomId, updateRoomDto, userId);
+    const room = await this.homeService.updateRoom(roomId, updateRoomDto, req.user.id);
     return ApiResponseDto.success('Room updated successfully', room);
   }
 
   @Delete('rooms/:roomId')
-  async deleteRoom(@Param('roomId') roomId: number, @Request() req): Promise<ApiResponseDto> {
-    // Use default user ID when authentication is disabled
-    const userId = req.user?.id || 1;
-    await this.homeService.deleteRoom(roomId, userId);
+  async deleteRoom(
+    @Param('roomId') roomId: number,
+    @Request() req: RequestWithUser
+  ): Promise<ApiResponseDto> {
+    await this.homeService.deleteRoom(roomId, req.user.id);
     return ApiResponseDto.success('Room deleted successfully');
   }
 
@@ -293,11 +296,9 @@ export class HomeController {
   async assignRuleToRoom(
     @Param('roomId') roomId: number,
     @Body() assignRuleDto: AssignRoomRuleDto,
-    @Request() req
+    @Request() req: RequestWithUser
   ): Promise<ApiResponseDto> {
-    // Use default user ID when authentication is disabled
-    const userId = req.user?.id || 1;
-    const roomRule = await this.homeService.assignRuleToRoom(roomId, assignRuleDto, userId);
+    const roomRule = await this.homeService.assignRuleToRoom(roomId, assignRuleDto, req.user.id);
     return ApiResponseDto.created('Rule assigned to room successfully', roomRule);
   }
 
@@ -305,19 +306,18 @@ export class HomeController {
   async updateRoomRule(
     @Param('ruleId') ruleId: number,
     @Body() assignRuleDto: AssignRoomRuleDto,
-    @Request() req
+    @Request() req: RequestWithUser
   ): Promise<ApiResponseDto> {
-    // Use default user ID when authentication is disabled
-    const userId = req.user?.id || 1;
-    const roomRule = await this.homeService.updateRoomRule(ruleId, assignRuleDto, userId);
+    const roomRule = await this.homeService.updateRoomRule(ruleId, assignRuleDto, req.user.id);
     return ApiResponseDto.success('Room rule updated successfully', roomRule);
   }
 
   @Delete('rules/:ruleId')
-  async deleteRoomRule(@Param('ruleId') ruleId: number, @Request() req): Promise<ApiResponseDto> {
-    // Use default user ID when authentication is disabled
-    const userId = req.user?.id || 1;
-    await this.homeService.deleteRoomRule(ruleId, userId);
+  async deleteRoomRule(
+    @Param('ruleId') ruleId: number,
+    @Request() req: RequestWithUser
+  ): Promise<ApiResponseDto> {
+    await this.homeService.deleteRoomRule(ruleId, req.user.id);
     return ApiResponseDto.success('Room rule deleted successfully');
   }
 
@@ -326,15 +326,13 @@ export class HomeController {
   async updateHomeImages(
     @Param('id') id: number,
     @Body() imageData: { image1?: string; image2?: string; image3?: string; image4?: string },
-    @Request() req
+    @Request() req: RequestWithUser
   ): Promise<ApiResponseDto> {
-    // Use default user ID when authentication is disabled
-    const userId = req.user?.id || 1;
     // Map image1, image2, ... to array if they exist
     const images = [imageData.image1, imageData.image2, imageData.image3, imageData.image4].filter(
       (img): img is string => !!img
     );
-    const home = await this.homeService.updateHomeImages(id, { images }, userId);
+    const home = await this.homeService.updateHomeImages(id, { images }, req.user.id);
     return ApiResponseDto.success('Home images updated successfully', home);
   }
 
@@ -342,15 +340,13 @@ export class HomeController {
   async updateRoomImages(
     @Param('roomId') roomId: number,
     @Body() imageData: { image1?: string; image2?: string; image3?: string; image4?: string },
-    @Request() req
+    @Request() req: RequestWithUser
   ): Promise<ApiResponseDto> {
-    // Use default user ID when authentication is disabled
-    const userId = req.user?.id || 1;
     // Map image1, image2, ... to array if they exist
     const images = [imageData.image1, imageData.image2, imageData.image3, imageData.image4].filter(
       (img): img is string => !!img
     );
-    const room = await this.homeService.updateRoomImages(roomId, { images }, userId);
+    const room = await this.homeService.updateRoomImages(roomId, { images }, req.user.id);
     return ApiResponseDto.success('Room images updated successfully', room);
   }
 }

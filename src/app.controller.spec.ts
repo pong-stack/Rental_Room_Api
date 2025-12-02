@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ApiResponseDto } from './common/dto/api-response.dto';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -17,7 +18,10 @@ describe('AppController', () => {
   describe('root', () => {
     it('should return API information object', () => {
       const result = appController.getHello();
-      expect(result).toEqual({
+      expect(result).toBeInstanceOf(ApiResponseDto);
+      expect(result.status).toBe(200);
+      expect(result.message).toBe('Welcome to NestJS API');
+      expect(result.data).toEqual({
         message: 'Welcome to NestJS API',
         version: '1.0.0',
         status: 'running',
@@ -30,6 +34,7 @@ describe('AppController', () => {
           verification: '/api/v1/verification',
         },
       });
+      expect(result.timestamp).toBeDefined();
     });
   });
 });

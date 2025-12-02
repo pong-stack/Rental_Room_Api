@@ -11,7 +11,6 @@ import { AdminModule } from './modules/admin/admin.module';
 import { InvoiceModule } from './modules/invoice/invoice.module';
 import { VerificationModule } from './modules/verification/verification.module';
 import { UserModule } from './modules/user/user.module';
-import { BackupModule } from './backup/backup.module';
 import { RoleUpgradeModule } from './modules/role-upgrade/role-upgrade.module';
 
 @Module({
@@ -25,8 +24,6 @@ import { RoleUpgradeModule } from './modules/role-upgrade/role-upgrade.module';
     InvoiceModule,
     VerificationModule,
     RoleUpgradeModule,
-    BackupModule,
-    // Legacy module
   ],
   controllers: [AppController],
   providers: [AppService],
