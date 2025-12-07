@@ -215,24 +215,11 @@ export class HomeController {
     @Request() req: RequestWithUser
   ): Promise<ApiResponseDto> {
     try {
-      // Handle form-data type conversions (form-data sends everything as strings)
-      if (typeof createRoomDto.homeId === 'string') {
-        createRoomDto.homeId = parseInt(createRoomDto.homeId, 10);
-      }
-      if (typeof createRoomDto.price === 'string') {
-        createRoomDto.price = parseFloat(createRoomDto.price);
-      }
-      if (createRoomDto.capacity && typeof createRoomDto.capacity === 'string') {
-        createRoomDto.capacity = parseInt(createRoomDto.capacity, 10);
-      }
-      if (createRoomDto.isAvailable && typeof createRoomDto.isAvailable === 'string') {
-        createRoomDto.isAvailable = createRoomDto.isAvailable === 'true';
-      }
-
       // Handle ruleIds from form-data (may come as JSON string)
+      // Note: homeId, price, capacity, and isAvailable are now automatically transformed by ValidationPipe
       if (createRoomDto.ruleIds && typeof createRoomDto.ruleIds === 'string') {
         try {
-          createRoomDto.ruleIds = JSON.parse(createRoomDto.ruleIds as any);
+          createRoomDto.ruleIds = JSON.parse(createRoomDto.ruleIds);
         } catch {
           throw new BadRequestException('Invalid ruleIds format. Expected JSON array.');
         }

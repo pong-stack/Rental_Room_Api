@@ -19,6 +19,10 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: false,
+      transform: true, // Enable automatic transformation of payloads
+      transformOptions: {
+        enableImplicitConversion: true, // Automatically convert types
+      },
     })
   );
   await app.listen(process.env.PORT ?? 6001, '0.0.0.0');
