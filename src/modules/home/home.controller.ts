@@ -215,16 +215,6 @@ export class HomeController {
     @Request() req: RequestWithUser
   ): Promise<ApiResponseDto> {
     try {
-      // Handle ruleIds from form-data (may come as JSON string)
-      // Note: homeId, price, capacity, and isAvailable are now automatically transformed by ValidationPipe
-      if (createRoomDto.ruleIds && typeof createRoomDto.ruleIds === 'string') {
-        try {
-          createRoomDto.ruleIds = JSON.parse(createRoomDto.ruleIds);
-        } catch {
-          throw new BadRequestException('Invalid ruleIds format. Expected JSON array.');
-        }
-      }
-
       // Process uploaded files and add URLs to DTO
       if (files && files.length > 0) {
         // Validate files

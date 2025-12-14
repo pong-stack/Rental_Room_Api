@@ -51,7 +51,8 @@ export class CreateRoomDto {
   images?: string[];
 
   @IsOptional()
-  @IsArray()
-  @IsInt({ each: true })
-  ruleIds?: number[];
+  @Type(() => Number)
+  @IsNumber()
+  @IsInt()
+  ruleId?: number;
 }

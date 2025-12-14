@@ -163,8 +163,8 @@ export class HomeService {
       throw new ForbiddenException('You can only add rooms to your own homes');
     }
 
-    // Extract ruleIds and roomName from DTO before creating room
-    const { ruleIds, roomName, price, capacity, isAvailable, images } = createRoomDto;
+    // Extract ruleId and roomName from DTO before creating room
+    const { ruleId, roomName, price, capacity, isAvailable, images } = createRoomDto;
 
     const room = this.roomRepository.create({
       price,
@@ -177,12 +177,38 @@ export class HomeService {
 
     const savedRoom = await this.roomRepository.save(room);
 
-    // Assign rules if provided
-    if (ruleIds && ruleIds.length > 0) {
-      await this.assignMultipleRulesToRoom(savedRoom.id, ruleIds, ownerId);
+    // Assign rule if provided
+    if (ruleId) {
+      try {
+        await this.assignRuleToRoom(savedRoom.id, { ruleId }, ownerId);
+      } catch (error) {
+        // If it's just a "already assigned" error, we can continue
+        // Otherwise, re-throw to see the actual error
+        if (!error.message?.includes('already assigned')) {
+          throw error;
+        }
+      }
     }
 
-    return savedRoom;
+    // Reload the room with rules relation to include them in the response
+    // Use QueryBuilder to ensure relations are properly loaded
+    const roomWithRules = await this.roomRepository
+      .createQueryBuilder('room')
+      .leftJoinAndSelect('room.rules', 'roomRule')
+      .leftJoinAndSelect('roomRule.rule', 'rule')
+      .where('room.id = :id', { id: savedRoom.id })
+      .getOne();
+
+    if (!roomWithRules) {
+      return savedRoom;
+    }
+
+    // Ensure rules array is initialized (TypeORM might not populate it if empty)
+    if (!roomWithRules.rules) {
+      roomWithRules.rules = [];
+    }
+
+    return roomWithRules;
   }
 
   async updateRoom(
